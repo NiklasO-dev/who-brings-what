@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.site_admin_title }}{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>{{ t.site_admin_title }}</h1>
+        <form method="post" action="/admin/logout" style="display:inline;">
+            <button type="submit" class="outline secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">{{ t.admin_logout }}</button>
+        </form>
+    </header>
+
+    {% if cleanup_result is not none %}
+    <p><mark>{{ t.site_admin_cleanup_result.replace('{count}', cleanup_result|string) }}</mark></p>
+    {% endif %}
+
+    <table>
+        <tbody>
+            <tr>
+                <td><strong>{{ t.site_admin_active_events }}</strong></td>
+                <td>{{ active_events }}</td>
+            </tr>
+            <tr>
+                <td><strong>{{ t.site_admin_done_events }}</strong></td>
+                <td>{{ done_events }}</td>
+            </tr>
+            <tr>
+                <td><strong>{{ t.site_admin_total_items }}</strong></td>
+                <td>{{ total_active_items }}</td>
+            </tr>
+            <tr>
+                <td><strong>{{ t.site_admin_avg_items }}</strong></td>
+                <td>{{ avg_items }}</td>
+            </tr>
+            <tr>
+                <td><strong>{{ t.site_admin_participations }}</strong></td>
+                <td>{{ total_participations }}</td>
+            </tr>
+            <tr>
+                <td><strong>{{ t.site_admin_comments }}</strong></td>
+                <td>{{ total_comments }}</td>
+            </tr>
+        </tbody>
+    </table>
+</article>
+
+<article>
+    <header><h2>{{ t.site_admin_retention }}</h2></header>
+    <ul>
+        <li>Active events: {{ settings.event_max_age_days }} days</li>
+        <li>Done events: {{ settings.done_event_cleanup_days }} days</li>
+    </ul>
+    <form method="post" action="/admin/cleanup">
+        <button type="submit">{{ t.site_admin_cleanup_btn }}</button>
+    </form>
+</article>
+{% endblock %}

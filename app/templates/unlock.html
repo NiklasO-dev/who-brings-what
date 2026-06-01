@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block nav_how_to_link %}#how-to-use{% endblock %}
+
+{% block title %}{{ t.unlock_title }}{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>{{ t.unlock_title }}</h1>
+        <p>{{ t.unlock_intro }}</p>
+    </header>
+
+    {% if error %}
+    <p><mark>{{ error }}</mark></p>
+    {% endif %}
+
+    <form method="post" action="{{ action_url }}">
+        <label for="encryption_key">
+            {{ t.unlock_key_label }}
+            <input type="text" id="encryption_key" name="encryption_key" required autocomplete="off" placeholder="{{ t.unlock_key_placeholder }}">
+            <small>{{ t.unlock_key_hint }}</small>
+        </label>
+        <button type="submit">{{ t.unlock_submit }}</button>
+    </form>
+</article>
+
+<article>
+    {% include "partials/howto_guest.html" %}
+</article>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.admin_login_title }}{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>{{ t.admin_login_title }}</h1>
+    </header>
+
+    {% if error %}
+    <p><mark>{{ t.admin_login_error }}</mark></p>
+    {% endif %}
+
+    <form method="post" action="/admin/login">
+        <label for="password">
+            {{ t.admin_login_password }}
+            <input type="password" id="password" name="password" required autofocus>
+        </label>
+        <button type="submit">{{ t.admin_login_submit }}</button>
+    </form>
+</article>
+{% endblock %}

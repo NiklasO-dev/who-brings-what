@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.home_title }}{% endblock %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>{{ t.home_title }}</h1>
+        <p>{{ t.home_intro }}</p>
+    </header>
+
+    <form method="post" action="/events">
+        <label for="title">
+            {{ t.home_field_title }}
+            <input type="text" id="title" name="title" placeholder="{{ t.home_field_title_placeholder }}" required maxlength="255">
+        </label>
+
+        <label for="organizer_email">
+            {{ t.home_field_email }}
+            <input type="email" id="organizer_email" name="organizer_email" placeholder="{{ t.home_field_email_placeholder }}">
+            <small>{{ t.home_field_email_hint }}</small>
+        </label>
+
+        <label for="encryption_key">
+            {{ t.home_field_key }}
+            <input type="text" id="encryption_key" name="encryption_key" placeholder="{{ t.home_field_key_placeholder }}" maxlength="255" autocomplete="off">
+            <small>{{ t.home_field_key_hint }}</small>
+        </label>
+
+        <button type="submit">{{ t.home_submit }}</button>
+    </form>
+</article>
+
+<article id="how-to-use">
+    <header>
+        <h2>{{ t.home_use_title }}</h2>
+    </header>
+
+    {% include "partials/howto_organizer.html" %}
+    {% include "partials/howto_guest_section.html" %}
+
+    <p><small>{{ t.home_privacy_note }}</small></p>
+    <p><small>{{ t.home_encryption_note }}</small></p>
+</article>
+{% endblock %}

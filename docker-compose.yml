@@ -1,0 +1,22 @@
+services:
+  wbw-app:
+    build: .
+    container_name: wbw-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: "sqlite+aiosqlite:////data/event.db"
+    volumes:
+      - wbw_data:/data
+    ports:
+      - "8001:8001"
+    networks:
+      - caddy
+
+volumes:
+  wbw_data:
+
+networks:
+  caddy:
+    external: true

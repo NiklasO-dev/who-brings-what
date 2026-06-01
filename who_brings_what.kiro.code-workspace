@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "kiro-clean-bash",
+    "terminal.integrated.profiles.linux": {
+      "kiro-clean-bash": {
+        "path": "/bin/bash",
+        "args": ["--noprofile", "--norc"],
+        "env": {
+          "SHELL": "/bin/bash"
+        }
+      }
+    }
+  }
+}

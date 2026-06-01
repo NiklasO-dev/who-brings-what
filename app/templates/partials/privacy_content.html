@@ -1,0 +1,51 @@
+<p>{{ t.privacy_intro }}</p>
+
+<h3>{{ t.privacy_cookies_title }}</h3>
+<p>{{ t.privacy_cookies_intro }}</p>
+<dl class="privacy-list">
+    <dt><code>wbw_lang</code></dt>
+    <dd>{{ t.privacy_cookie_lang }}</dd>
+    <dt><code>wbw_admin_auth</code></dt>
+    <dd>{{ t.privacy_cookie_admin }}</dd>
+</dl>
+
+<h3>{{ t.privacy_storage_title }}</h3>
+<p>{{ t.privacy_storage_intro }}</p>
+<dl class="privacy-list">
+    <dt><code>wbw_theme</code></dt>
+    <dd>{{ t.privacy_storage_theme }}</dd>
+    <dt><code>wbw_guest_name</code></dt>
+    <dd>{{ t.privacy_storage_guest_name }}</dd>
+    <dt><code>wbw_admin_scroll</code></dt>
+    <dd>{{ t.privacy_storage_scroll }}</dd>
+</dl>
+
+<h3>{{ t.privacy_db_title }}</h3>
+<p>{{ t.privacy_db_intro }}</p>
+
+<h4>{{ t.privacy_db_events_title }}</h4>
+<p>{{ t.privacy_db_events }}</p>
+
+<h4>{{ t.privacy_db_items_title }}</h4>
+<p>{{ t.privacy_db_items }}</p>
+
+<h4>{{ t.privacy_db_participations_title }}</h4>
+<p>{{ t.privacy_db_participations }}</p>
+
+<h4>{{ t.privacy_db_comments_title }}</h4>
+<p>{{ t.privacy_db_comments }}</p>
+
+<h4>{{ t.privacy_db_stats_title }}</h4>
+<p>{{ t.privacy_db_stats }}</p>
+
+<p><small>{{ t.privacy_db_encrypted }}</small></p>
+
+<h3>{{ t.privacy_not_stored_title }}</h3>
+<ul>
+    <li>{{ t.privacy_not_stored_key }}</li>
+    <li>{{ t.privacy_not_stored_accounts }}</li>
+    <li>{{ t.privacy_not_stored_tracking }}</li>
+</ul>
+
+<h3>{{ t.privacy_retention_title }}</h3>
+<p>{{ t.privacy_retention_text.replace('{days}', settings.event_max_age_days|string).replace('{done_days}', settings.done_event_cleanup_days|string) }}</p>

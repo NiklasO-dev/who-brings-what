@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.admin_title_prefix }}: {{ event.title }}{% endblock %}
+
+{% block content %}
+{% if event.is_done %}
+<article>
+    <header>
+        <h1>{{ event.title }}</h1>
+        <p><mark>{{ t.admin_done_message }}</mark></p>
+    </header>
+    <p>{{ t.admin_done_text }}</p>
+</article>
+{% else %}
+
+<article>
+    <div class="admin-header-row">
+        <div class="admin-header-title">
+            <h1>{{ event.title }}</h1>
+            <p>{{ t.admin_subtitle }}</p>
+            <details>
+                <summary>{{ t.admin_edit_title }}</summary>
+                <form method="post" action="/event/admin/{{ event.admin_token }}/title">
+                    <input type="hidden" name="key" value="{{ encryption_key }}">
+                    <label for="title">
+                        {{ t.admin_new_title }}
+                        <input type="text" id="title" name="title" value="{{ event.title }}" required maxlength="255">
+                    </label>
+                    <button type="submit">{{ t.admin_update_title }}</button>
+                </form>
+            </details>
+        </div>
+        <div class="admin-header-links">
+            <label>
+                <input type="checkbox" id="include-key-toggle" checked>
+                {{ t.admin_include_key_in_links }}
+            </label>
+            <label><strong>{{ t.admin_encryption_key }}</strong></label>
+            {% if show_key_reveal %}
+            <p><mark>{{ t.admin_key_reveal_text }}</mark></p>
+            {% endif %}
+            <div class="copy-row">
+                <input type="text" id="encryption-key-input" value="{{ encryption_key }}" readonly>
+                <button type="button" class="copy-btn outline secondary" data-target="encryption-key-input" title="{{ t.admin_copy_key }}">📋</button>
+            </div>
+            <small>{{ t.admin_encryption_key_hint }}</small>
+            <label><strong>{{ t.admin_guest_link }}</strong> ({{ t.admin_guest_link_hint }})</label>
+            <div class="copy-row">
+                <input type="text" id="guest-url-input" value="{{ guest_url_with_key }}" readonly
+                       data-url-with-key="{{ guest_url_with_key }}"
+                       data-url-without-key="{{ guest_url_without_key }}">
+                <button type="button" class="copy-btn outline secondary" data-target="guest-url-input" title="Copy">📋</button>
+            </div>
+            <label><strong>{{ t.admin_link }}</strong> ({{ t.admin_link_hint }})</label>
+            <div class="copy-row">
+                <input type="text" id="admin-url-input" value="{{ admin_url_with_key }}" readonly
+                       data-url-with-key="{{ admin_url_with_key }}"
+                       data-url-without-key="{{ admin_url_without_key }}">
+                <button type="button" class="copy-btn outline secondary" data-target="admin-url-input" title="Copy">📋</button>
+            </div>
+        </div>
+    </div>
+    <p><small>{{ t.admin_expires_on }} <strong>{{ expires_at.strftime('%d.%m.%Y') }}</strong>.</small></p>
+    <a href="/event/admin/{{ event.admin_token }}/export?key={{ encryption_key | urlencode }}" target="_blank" class="outline secondary" role="button" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">{{ t.admin_export_btn }} ↗</a>
+    <a href="/event/admin/{{ event.admin_token }}/share?key={{ encryption_key | urlencode }}" class="outline secondary" role="button" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">{{ t.admin_share_btn }}</a>
+</article>
+
+<article>
+    <header><h2>{{ t.admin_presets_header }}</h2></header>
+    <form method="post" action="/event/admin/{{ event.admin_token }}/presets">
+        <input type="hidden" name="key" value="{{ encryption_key }}">
+        <div class="grid">
+            <label for="preset_title">
+                {{ t.admin_preset_name }}
+                <input type="text" id="preset_title" name="title" required maxlength="255" placeholder="{{ t.admin_preset_placeholder }}">
+            </label>
+            <label for="preset_desc">
+                {{ t.admin_description }}
+                <input type="text" id="preset_desc" name="description" maxlength="500" placeholder="{{ t.admin_description_placeholder }}">
+            </label>
+        </div>
+        <button type="submit">{{ t.admin_submit_preset }}</button>
+    </form>
+
+    {% if preset_items %}
+    <div id="sortable-presets" style="margin-top: 1rem;">
+    {% for item in preset_items %}
+    <article data-item-id="{{ item.id }}" class="sortable-item">
+        <header>
+            <span class="drag-handle" title="{{ t.admin_drag_hint }}">⠿</span>
+            <strong>{{ item.title }}</strong>
+            <small> — {{ t.admin_source_preset }}</small>
+        </header>
+        {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+        <details>
+            <summary>{{ t.admin_edit_item }}</summary>
+            <form method="post" action="/event/admin/{{ event.admin_token }}/presets/{{ item.id }}/edit">
+                <input type="hidden" name="key" value="{{ encryption_key }}">
+                <label>{{ t.admin_preset_name }} <input type="text" name="title" value="{{ item.title }}" required></label>
+                <label>{{ t.admin_description }} <input type="text" name="description" value="{{ item.description or '' }}"></label>
+                <button type="submit">{{ t.admin_save_changes }}</button>
+            </form>
+        </details>
+        <form method="post" action="/event/admin/{{ event.admin_token }}/presets/{{ item.id }}/delete">
+            <input type="hidden" name="key" value="{{ encryption_key }}">
+            <button type="submit" class="outline contrast">{{ t.admin_delete_item }}</button>
+        </form>
+    </article>
+    {% endfor %}
+    </div>
+    <form id="reorder-form" method="post" action="/event/admin/{{ event.admin_token }}/presets/reorder" style="display:none;">
+        <input type="hidden" name="key" value="{{ encryption_key }}">
+        <input type="hidden" name="order" id="reorder-input">
+    </form>
+    {% endif %}
+</article>
+
+<article>
+    <header><h2>{{ t.admin_contributions_header }} ({{ all_items|length }})</h2></header>
+    {% if all_items %}
+    {% for item in all_items %}
+    <article>
+        <header>
+            <strong>{{ item.title }}</strong>
+            <small> — {% if item.is_preset %}{{ t.admin_source_preset }}{% else %}{{ t.admin_source_guest }}{% endif %}</small>
+        </header>
+        {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+
+        {% set parts = item.active_participations %}
+        <p><strong>{{ t.admin_brought_by }}</strong></p>
+        {% if parts %}
+        <ol>
+            {% for p in parts %}
+            <li>
+                <span class="reservation-row">
+                    <span>{{ p.person_name }}{% if p.note %} — <em>{{ p.note }}</em>{% endif %}</span>
+                    <form method="post" action="/event/admin/{{ event.admin_token }}/participations/{{ p.id }}/delete">
+                        <input type="hidden" name="key" value="{{ encryption_key }}">
+                        <button type="submit" class="outline secondary remove-btn" title="{{ t.admin_remove_participation }}">✕</button>
+                    </form>
+                </span>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p><small>{{ t.admin_no_participations }}</small></p>
+        {% endif %}
+
+        {% set comments = item.active_comments %}
+        <p><strong>{{ t.admin_comments }}</strong></p>
+        {% if comments %}
+        <ul>
+            {% for c in comments %}
+            <li>
+                <span class="reservation-row">
+                    <span><strong>{{ c.author_name }}:</strong> {{ c.text }}</span>
+                    <form method="post" action="/event/admin/{{ event.admin_token }}/comments/{{ c.id }}/delete">
+                        <input type="hidden" name="key" value="{{ encryption_key }}">
+                        <button type="submit" class="outline secondary remove-btn" title="{{ t.admin_remove_comment }}">✕</button>
+                    </form>
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p><small>{{ t.admin_no_comments }}</small></p>
+        {% endif %}
+
+        <form method="post" action="/event/admin/{{ event.admin_token }}/items/{{ item.id }}/delete">
+            <input type="hidden" name="key" value="{{ encryption_key }}">
+            <button type="submit" class="outline contrast">{{ t.admin_delete_item }}</button>
+        </form>
+    </article>
+    {% endfor %}
+    {% else %}
+    <p>{{ t.guest_no_items }}</p>
+    {% endif %}
+</article>
+
+<article>
+    <header><h2>{{ t.admin_finish_title }}</h2></header>
+    <p>{{ t.admin_finish_text }}</p>
+    <form method="post" action="/event/admin/{{ event.admin_token }}/done">
+        <input type="hidden" name="key" value="{{ encryption_key }}">
+        <button type="submit" class="contrast">{{ t.admin_mark_done }}</button>
+    </form>
+    <hr>
+    <p><strong>{{ t.admin_delete_title }}</strong> — {{ t.admin_delete_warning }}</p>
+    <form method="post" action="/event/admin/{{ event.admin_token }}/delete" onsubmit="return confirm('{{ t.admin_delete_confirm }}');">
+        <button type="submit" class="outline contrast">{{ t.admin_delete_btn }}</button>
+    </form>
+</article>
+
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var scrollKey = 'wbw_admin_scroll';
+    var savedScroll = sessionStorage.getItem(scrollKey);
+    if (savedScroll) {
+        window.scrollTo(0, parseInt(savedScroll, 10));
+        sessionStorage.removeItem(scrollKey);
+    }
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            sessionStorage.setItem(scrollKey, window.scrollY.toString());
+        });
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var url = document.getElementById(btn.getAttribute('data-target')).value;
+            navigator.clipboard.writeText(url).then(function() {
+                btn.textContent = '✓';
+                setTimeout(function() { btn.textContent = '📋'; }, 1500);
+            });
+        });
+    });
+
+    var keyToggle = document.getElementById('include-key-toggle');
+    if (keyToggle) {
+        function updateLinkUrls() {
+            var includeKey = keyToggle.checked;
+            ['guest-url-input', 'admin-url-input'].forEach(function(id) {
+                var input = document.getElementById(id);
+                if (input) {
+                    input.value = includeKey
+                        ? input.getAttribute('data-url-with-key')
+                        : input.getAttribute('data-url-without-key');
+                }
+            });
+        }
+        keyToggle.addEventListener('change', updateLinkUrls);
+    }
+
+    var sortableContainer = document.getElementById('sortable-presets');
+    if (sortableContainer) {
+        Sortable.create(sortableContainer, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            onEnd: function() {
+                sessionStorage.setItem(scrollKey, window.scrollY.toString());
+                var items = sortableContainer.querySelectorAll('.sortable-item');
+                var ids = Array.from(items).map(function(el) { return el.getAttribute('data-item-id'); });
+                document.getElementById('reorder-input').value = ids.join(',');
+                document.getElementById('reorder-form').submit();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ t.site_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="/static/style.css?v=1">
+    <script>
+        (function() {
+            var saved = localStorage.getItem('wbw_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+</head>
+<body>
+    <header class="container">
+        <nav>
+            <ul>
+                <li><a href="/"><strong>{{ t.nav_home }}</strong></a></li>
+            </ul>
+            <ul>
+                <li><a href="{% block nav_how_to_link %}/#how-to-use{% endblock %}">{{ t.nav_how_to_use }}</a></li>
+                <li>
+                    <details class="dropdown lang-dropdown">
+                        <summary>{{ t.lang_label }}</summary>
+                        <ul dir="ltr">
+                            <li><a href="/set-lang/en">English</a></li>
+                            <li><a href="/set-lang/de">Deutsch</a></li>
+                        </ul>
+                    </details>
+                </li>
+                <li><button id="theme-toggle" class="outline secondary theme-toggle-btn" title="Toggle light/dark mode">🌙</button></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    {% include "partials/site_footer.html" %}
+    {% include "partials/privacy_dialog.html" %}
+    <script src="/static/app.js?v=1"></script>
+    <script>
+        (function() {
+            var btn = document.getElementById('theme-toggle');
+            var html = document.documentElement;
+            function updateIcon() {
+                btn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+            }
+            updateIcon();
+            btn.addEventListener('click', function() {
+                var current = html.getAttribute('data-theme');
+                var next = current === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('wbw_theme', next);
+                updateIcon();
+            });
+        })();
+    </script>
+</body>
+</html>

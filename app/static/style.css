@@ -1,0 +1,356 @@
+/* Custom styles for Who Brings What? */
+
+:root {
+    --pico-font-size: 87.5%;
+}
+
+/* Dark mode contrast improvements */
+[data-theme="dark"] {
+    --pico-mark-background-color: #3d2e00;
+    --pico-mark-color: #ffd666;
+}
+
+[data-theme="dark"] mark {
+    background-color: var(--pico-mark-background-color);
+    color: var(--pico-mark-color);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+}
+
+[data-theme="dark"] a {
+    color: #6cb4ff;
+}
+
+[data-theme="dark"] a:hover {
+    color: #9dcfff;
+}
+
+[data-theme="dark"] input[readonly] {
+    background-color: #1a1f2e;
+    color: #c2c9d6;
+    border-color: #3a4050;
+}
+
+[data-theme="dark"] small {
+    color: #9ca3b0;
+}
+
+[data-theme="dark"] article {
+    border-color: #2a3040;
+}
+
+[data-theme="dark"] hr {
+    border-color: #2a3040;
+}
+
+footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pico-muted-border-color);
+    text-align: center;
+}
+
+article header h1,
+article header h2 {
+    margin-bottom: 0.25rem;
+}
+
+details summary {
+    cursor: pointer;
+}
+
+input[readonly] {
+    cursor: text;
+}
+
+form[style*="display:inline"] {
+    display: inline;
+}
+
+/* --- Guest page: item grid --- */
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.item-grid .item-card {
+    margin-bottom: 0;
+}
+
+@media (max-width: 992px) {
+    .item-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .item-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Admin page: header row (title + links side by side) --- */
+
+.admin-header-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .admin-header-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.admin-header-title h1 {
+    margin-bottom: 0.25rem;
+}
+
+.admin-header-links label {
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+/* --- Copy button row --- */
+
+.copy-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.copy-row input[readonly] {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.copy-btn {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+/* --- Reservation row: name + remove button inline --- */
+
+.reservation-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reservation-row form {
+    margin: 0;
+    display: inline;
+}
+
+.remove-btn {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    margin: 0;
+}
+
+/* --- Theme toggle button --- */
+
+.theme-toggle-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* --- Language dropdown --- */
+
+.lang-dropdown {
+    margin: 0;
+    padding: 0;
+}
+
+.lang-dropdown summary {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+/* --- Drag-and-drop sorting --- */
+
+.drag-handle {
+    cursor: grab;
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+    opacity: 0.5;
+    user-select: none;
+}
+
+.drag-handle:hover {
+    opacity: 1;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+    border: 2px dashed var(--pico-primary);
+}
+
+.sortable-item {
+    transition: transform 0.15s ease;
+}
+
+/* --- Guest undo button --- */
+
+.undo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.undo-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.undo-timer {
+    color: var(--pico-muted-color);
+}
+
+.how-to-use {
+    margin-top: 0;
+}
+
+.how-to-use summary {
+    cursor: pointer;
+}
+
+.site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.site-footer small {
+    margin: 0;
+}
+
+.privacy-dialog {
+    max-width: 42rem;
+    width: calc(100% - 2rem);
+    padding: 0;
+    border: var(--pico-border-width) solid var(--pico-muted-border-color);
+    background: var(--pico-background-color);
+    color: var(--pico-color);
+}
+
+.privacy-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.privacy-dialog-content {
+    margin: 0;
+    max-height: min(85vh, 40rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.privacy-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--pico-background-color);
+    padding: 1rem 1.25rem 0.75rem;
+    margin: 0;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.privacy-dialog-header h2 {
+    margin: 0;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.privacy-dialog-close {
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    line-height: 1;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.privacy-dialog-body {
+    padding: 1rem 1.25rem 0.5rem;
+}
+
+.privacy-dialog-body > p:first-child {
+    margin-top: 0;
+}
+
+.privacy-dialog-footer {
+    padding: 0.75rem 1.25rem 1rem;
+    margin: 0;
+    border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.privacy-list dt {
+    font-weight: 600;
+    margin-top: 0.75rem;
+}
+
+.privacy-list dt code {
+    font-size: 0.9em;
+}
+
+.privacy-list dd {
+    margin-left: 0;
+    margin-bottom: 0;
+    color: var(--pico-muted-color);
+}
+
+.privacy-dialog-content h3,
+.privacy-dialog-content h4 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-dialog-content h4 {
+    font-size: 1rem;
+}
+
+.item-card.preset-open {
+    border-left: 3px solid var(--pico-primary);
+}
+
+.comment-thread {
+    margin: 0.5rem 0;
+    padding: 0.5rem 0.75rem;
+    border-left: 2px solid var(--pico-muted-border-color);
+    font-size: 0.9em;
+}
+
+.comment-thread p {
+    margin: 0.25rem 0;
+}

@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block nav_how_to_link %}#how-to-use{% endblock %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% macro item_card(item) %}
+<article class="item-card {% if item.is_preset and not item.active_participations %}preset-open{% endif %}">
+    <header>
+        <strong>{{ item.title }}</strong>
+        {% if item.is_preset and not item.active_participations %}
+        <small><mark>{{ t.guest_open_preset }}</mark></small>
+        {% endif %}
+    </header>
+    {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+
+    {% set parts = item.active_participations %}
+    {% if parts %}
+    <p><strong>{{ t.guest_brought_by }}</strong>
+        {% for p in parts %}
+        {{ p.person_name }}{% if p.note %} ({{ p.note }}){% endif %}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+
+    <form method="post" action="/event/guest/{{ guest_token }}/items/{{ item.id }}/participate" class="participate-form">
+        <input type="hidden" name="key" value="{{ encryption_key }}">
+        <input type="hidden" name="person_name" class="guest-name-hidden">
+        <label>
+            {{ t.guest_note_label }}
+            <input type="text" name="note" maxlength="255" placeholder="{{ t.guest_note_placeholder }}">
+        </label>
+        <button type="submit">{{ t.guest_join_btn }}</button>
+    </form>
+    <div class="undo-container" data-item-id="{{ item.id }}" style="display:none;">
+        <button type="button" class="undo-btn outline secondary">{{ t.guest_undo_btn }}</button>
+        <small class="undo-timer"></small>
+    </div>
+
+    {% set comments = item.active_comments %}
+    {% if comments %}
+    <div class="comment-thread">
+        {% for c in comments %}
+        <p><strong>{{ c.author_name }}:</strong> {{ c.text }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <details>
+        <summary>{{ t.guest_comment_btn }}</summary>
+        <form method="post" action="/event/guest/{{ guest_token }}/items/{{ item.id }}/comments">
+            <input type="hidden" name="key" value="{{ encryption_key }}">
+            <input type="hidden" name="author_name" class="guest-name-hidden">
+            <label>
+                {{ t.guest_comment_label }}
+                <textarea name="text" rows="2" required maxlength="1000" placeholder="{{ t.guest_comment_placeholder }}"></textarea>
+            </label>
+            <button type="submit" class="outline secondary">{{ t.guest_submit_comment }}</button>
+        </form>
+    </details>
+</article>
+{% endmacro %}
+
+{% block content %}
+<article>
+    <header>
+        <h1>{{ event.title }}</h1>
+        <p>{{ t.guest_intro }}</p>
+    </header>
+    <label for="global-guest-name">
+        <strong>{{ t.guest_name_label }}</strong>
+        <input type="text" id="global-guest-name" placeholder="{{ t.guest_name_placeholder }}" maxlength="255" required>
+    </label>
+</article>
+
+{% if preset_items %}
+<article>
+    <header><h2>{{ t.guest_presets_header }}</h2></header>
+    <div class="item-grid">
+        {% for item in preset_items %}
+        {{ item_card(item) }}
+        {% endfor %}
+    </div>
+</article>
+{% endif %}
+
+{% if guest_items %}
+<article>
+    <header><h2>{{ t.guest_guest_items_header }}</h2></header>
+    <div class="item-grid">
+        {% for item in guest_items %}
+        {{ item_card(item) }}
+        {% endfor %}
+    </div>
+</article>
+{% endif %}
+
+{% if not preset_items and not guest_items %}
+<article><p>{{ t.guest_no_items }}</p></article>
+{% endif %}
+
+<article>
+    <header><h2>{{ t.guest_add_item_header }}</h2></header>
+    <form method="post" action="/event/guest/{{ guest_token }}/items" id="add-item-form">
+        <input type="hidden" name="key" value="{{ encryption_key }}">
+        <input type="hidden" name="person_name" id="add-item-person-name">
+        <label for="item_title">
+            {{ t.guest_item_title }}
+            <input type="text" id="item_title" name="title" required maxlength="255" placeholder="{{ t.guest_item_placeholder }}">
+        </label>
+        <label for="item_desc">
+            {{ t.guest_item_description }}
+            <input type="text" id="item_desc" name="description" maxlength="500">
+        </label>
+        <button type="submit">{{ t.guest_submit_item }}</button>
+    </form>
+</article>
+
+<article>
+    {% include "partials/howto_guest.html" %}
+</article>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var nameInput = document.getElementById('global-guest-name');
+    var storageKey = 'wbw_guest_name';
+    var guestToken = '{{ guest_token }}';
+    var encryptionKey = '{{ encryption_key }}';
+    var keyQuery = encryptionKey ? ('?key=' + encodeURIComponent(encryptionKey)) : '';
+
+    var savedName = localStorage.getItem(storageKey);
+    if (savedName) nameInput.value = savedName;
+
+    function getName() {
+        return nameInput.value.trim();
+    }
+
+    nameInput.addEventListener('input', function() {
+        localStorage.setItem(storageKey, nameInput.value);
+        if (nameInput.value.trim()) nameInput.removeAttribute('aria-invalid');
+    });
+
+    document.querySelectorAll('.guest-name-hidden').forEach(function(input) {
+        input.value = getName();
+    });
+
+    document.getElementById('add-item-form').addEventListener('submit', function(e) {
+        var name = getName();
+        if (!name) {
+            e.preventDefault();
+            nameInput.focus();
+            nameInput.setAttribute('aria-invalid', 'true');
+            return;
+        }
+        document.getElementById('add-item-person-name').value = name;
+    });
+
+    document.querySelectorAll('.participate-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var name = getName();
+            if (!name) {
+                nameInput.focus();
+                nameInput.setAttribute('aria-invalid', 'true');
+                return;
+            }
+            form.querySelector('.guest-name-hidden').value = name;
+
+            var action = form.getAttribute('action') + keyQuery;
+            var formData = new FormData(form);
+            var submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            fetch(action, { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.participation_id) {
+                    form.style.display = 'none';
+                    var undoContainer = form.closest('.item-card').querySelector('.undo-container');
+                    undoContainer.style.display = 'block';
+                    startUndoTimer(undoContainer, guestToken, data.participation_id, form);
+                } else {
+                    window.location.href = window.location.pathname + keyQuery;
+                }
+            })
+            .catch(function() {
+                window.location.href = window.location.pathname + keyQuery;
+            });
+        });
+    });
+
+    document.querySelectorAll('form[action*="/comments"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            var name = getName();
+            if (!name) {
+                e.preventDefault();
+                nameInput.focus();
+                nameInput.setAttribute('aria-invalid', 'true');
+                return;
+            }
+            form.querySelector('.guest-name-hidden').value = name;
+        });
+    });
+
+    function startUndoTimer(container, token, participationId, originalForm) {
+        var undoBtn = container.querySelector('.undo-btn');
+        var timerEl = container.querySelector('.undo-timer');
+        var secondsLeft = 60;
+        var undone = false;
+
+        function updateTimer() { timerEl.textContent = secondsLeft + 's'; }
+        updateTimer();
+
+        var interval = setInterval(function() {
+            secondsLeft--;
+            updateTimer();
+            if (secondsLeft <= 0) {
+                clearInterval(interval);
+                window.location.href = window.location.pathname + keyQuery;
+            }
+        }, 1000);
+
+        undoBtn.addEventListener('click', function() {
+            if (undone) return;
+            undone = true;
+            clearInterval(interval);
+            undoBtn.disabled = true;
+
+            fetch('/event/guest/' + token + '/participations/' + participationId + '/undo' + keyQuery, {
+                method: 'POST'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    container.style.display = 'none';
+                    originalForm.style.display = '';
+                    originalForm.querySelector('button[type="submit"]').disabled = false;
+                } else {
+                    window.location.href = window.location.pathname + keyQuery;
+                }
+            })
+            .catch(function() {
+                window.location.href = window.location.pathname + keyQuery;
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

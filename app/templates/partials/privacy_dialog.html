@@ -1,0 +1,11 @@
+<dialog id="privacy-dialog" class="privacy-dialog">
+    <article class="privacy-dialog-content">
+        <header class="privacy-dialog-header">
+            <h2>{{ t.privacy_title }}</h2>
+            <button type="button" class="privacy-dialog-close secondary outline" aria-label="{{ t.privacy_close }}" data-privacy-close>&times;</button>
+        </header>
+        <div class="privacy-dialog-body">
+            {% include "partials/privacy_content.html" %}
+        </div>
+    </article>
+</dialog>

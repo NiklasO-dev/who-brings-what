@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t.share_page_title }}: {{ event.title }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="/static/style.css?v=1">
+    <script>
+        (function() {
+            var saved = localStorage.getItem('wbw_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+    <style>
+        .print-preview { max-width: 600px; margin: 0 auto; text-align: center; }
+        .print-preview h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .additional-info { font-size: 1rem; margin: 1rem 0 1.5rem; white-space: pre-wrap; }
+        .qr-section { margin: 2rem 0; }
+        .qr-section img { display: block; margin: 0 auto; }
+        .qr-loader { padding: 2rem 0; font-size: 0.9rem; opacity: 0.7; }
+        .guest-url { font-size: 0.8rem; word-break: break-all; margin-top: 0.5rem; opacity: 0.7; }
+        .editor-controls { margin-bottom: 2rem; }
+        @media print {
+            @page { size: auto; margin: 0; }
+            * { padding-left: 0 !important; padding-right: 0 !important; margin-left: 0 !important; margin-right: 0 !important; max-width: 100% !important; width: auto !important; }
+            html, body { margin: 0 !important; padding: 1.5cm !important; background: #fff !important; color: #111 !important; }
+            header, footer, .editor-controls, .back-link { display: none !important; }
+            .print-preview { text-align: center; color: #111 !important; }
+            .guest-url { color: #555 !important; opacity: 1; }
+            .qr-section img { width: 200px !important; margin: 0 auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="container">
+        <nav>
+            <ul><li><a href="/"><strong>{{ t.nav_home }}</strong></a></li></ul>
+            <ul><li><button id="theme-toggle" class="outline secondary theme-toggle-btn">🌙</button></li></ul>
+        </nav>
+    </header>
+    <main class="container">
+        <a href="/event/admin/{{ event.admin_token }}?key={{ encryption_key | urlencode }}" class="back-link">← {{ t.share_back }}</a>
+
+        <article class="editor-controls">
+            <header><h2>{{ t.share_page_title }}</h2></header>
+            <p>{{ t.share_intro }}</p>
+            <label>
+                <input type="checkbox" id="include-key-toggle" checked>
+                {{ t.share_include_key }}
+            </label>
+            <label for="custom-title">{{ t.share_custom_title }}</label>
+            <input type="text" id="custom-title" value="{{ event.title }}">
+            <label for="additional-text">{{ t.share_additional_message }}</label>
+            <textarea id="additional-text" rows="3"></textarea>
+            <br>
+            <button type="button" onclick="window.print()">🖨 {{ t.share_print_btn }}</button>
+        </article>
+
+        <div class="print-preview">
+            <h1 id="preview-title">{{ event.title }}</h1>
+            <div class="additional-info" id="additional-display"></div>
+            <div class="qr-section">
+                <div id="qr-loader" class="qr-loader">…</div>
+                <div id="qr-container" style="display:none;"></div>
+                <p class="guest-url" id="guest-url-display">{{ guest_url_with_key }}</p>
+            </div>
+        </div>
+    </main>
+    {% include "partials/site_footer.html" %}
+    <script src="/static/app.js?v=1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script>
+        (function() {
+            var btn = document.getElementById('theme-toggle');
+            var html = document.documentElement;
+            btn.addEventListener('click', function() {
+                var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', next);
+                localStorage.setItem('wbw_theme', next);
+                btn.textContent = next === 'dark' ? '☀️' : '🌙';
+            });
+            btn.textContent = html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+
+            var guestUrlWithKey = '{{ guest_url_with_key }}';
+            var guestUrlWithoutKey = '{{ guest_url_without_key }}';
+            var currentGuestUrl = guestUrlWithKey;
+
+            function renderQr(url) {
+                var qr = qrcode(0, 'M');
+                qr.addData(url);
+                qr.make();
+                var container = document.getElementById('qr-container');
+                container.innerHTML = '';
+                var img = document.createElement('img');
+                img.src = qr.createDataURL(6, 4);
+                img.alt = 'QR Code';
+                img.style.width = '200px';
+                img.style.height = '200px';
+                container.appendChild(img);
+                document.getElementById('guest-url-display').textContent = url;
+            }
+
+            renderQr(currentGuestUrl);
+            document.getElementById('qr-loader').style.display = 'none';
+            document.getElementById('qr-container').style.display = '';
+
+            document.getElementById('include-key-toggle').addEventListener('change', function() {
+                currentGuestUrl = this.checked ? guestUrlWithKey : guestUrlWithoutKey;
+                renderQr(currentGuestUrl);
+            });
+
+            document.getElementById('custom-title').addEventListener('input', function() {
+                document.getElementById('preview-title').textContent = this.value || '{{ event.title }}';
+            });
+            document.getElementById('additional-text').addEventListener('input', function() {
+                document.getElementById('additional-display').textContent = this.value;
+            });
+        })();
+    </script>
+</body>
+</html>
